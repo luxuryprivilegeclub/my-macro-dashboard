@@ -24,10 +24,10 @@ except:
     st.error("API Key missing! Check Streamlit Secrets.")
     st.stop()
 
-# --- Helper Function (Updated: Title Color White) ---
+# --- Helper Function (White Headings) ---
 def draw_meter(col, name, latest, prev, info_next, msg, dxy_b, gold_b, color, bg, height=280):
     with col:
-        # CHANGED: color: #ffffff (White)
+        # Title Color: White (#ffffff)
         st.markdown(f"<p style='text-align: center; font-weight: bold; margin-bottom: -40px; color: #ffffff; font-size: 16px; position: relative; z-index: 10;'>{name}</p>", unsafe_allow_html=True)
         
         fig = go.Figure(go.Indicator(
@@ -128,14 +128,14 @@ for i, (name, info) in enumerate(yield_ind.items()):
         draw_meter(cols3[i], name, latest, prev, info['next'], "Yield Analysis", d_b, g_b, "#1e3c72", "#fafafa", 200)
     except: st.write(f"Error {name}")
 
-# Fed Target Meter (4th Column in Section 3)
+# Fed Target Meter (4th Column)
 try:
     cpi_data = fred.get_series('CPIAUCSL')
     curr_inf = ((cpi_data.iloc[-1] - cpi_data.iloc[-13]) / cpi_data.iloc[-13]) * 100
     draw_meter(cols3[3], "Inf. vs 2% Target", curr_inf, 2.0, "Feb 13", f"Gap: {curr_inf-2:.2f}%", "Fed Goal", "Macro Bias", "red", "#fafafa", 200)
 except: st.write("Target Error")
 
-# --- SECTION 4: COT REPORT (DROPDOWN & EXPERT ANALYSIS) ---
+# --- SECTION 4: COT REPORT (MODERN RING CHART) ---
 st.markdown("<hr><h2 style='text-align: center; color: #d4af37;'>🏆 Smart Money COT Analysis (Gold)</h2>", unsafe_allow_html=True)
 cot_reports = [
     {"date": "Feb 06, 2026", "longs": 285000, "shorts": 45000, "analysis": "Smart Money ne mazeed longs add kiye hain. Gold par bullish pressure barh raha hai kyunke shorts cover ho rahay hain. ICT order block par buy setups talash karein."},
@@ -148,10 +148,27 @@ sentiment = (rep['longs'] / (rep['longs'] + rep['shorts'])) * 100
 
 col_l, col_r = st.columns([1, 1.5])
 with col_l:
-    # CHANGED: Title Color White
-    st.markdown(f"<p style='text-align: center; font-weight: bold; margin-bottom: -30px; color: #ffffff; font-size: 16px;'>Bullish Sentiment Index</p>", unsafe_allow_html=True)
-    fig_cot = go.Figure(go.Indicator(mode="gauge+number", value=sentiment, gauge={'bar': {'color': "#d4af37"}, 'axis': {'range': [0, 100]}}))
-    fig_cot.update_layout(height=280, margin=dict(l=20, r=20, t=50, b=0))
+    # Modern Donut Chart (Ring) Logic
+    fig_cot = go.Figure(data=[go.Pie(
+        values=[sentiment, 100-sentiment],
+        hole=.75, # Creates the ring effect
+        direction='clockwise',
+        sort=False,
+        marker=dict(colors=['#d4af37', '#f0f0f0']), # Gold filled, Grey empty
+        textinfo='none',
+        hoverinfo='none'
+    )])
+    
+    # Adding Center Text
+    fig_cot.update_layout(
+        showlegend=False,
+        margin=dict(t=20, b=20, l=20, r=20),
+        height=300,
+        annotations=[
+            dict(text=f"{int(sentiment)}%", x=0.5, y=0.55, font_size=40, showarrow=False, font_family="Arial Black", font_color="#d4af37"),
+            dict(text="BULLISH POWER", x=0.5, y=0.42, font_size=12, showarrow=False, font_color="#555", font_weight="bold")
+        ]
+    )
     st.plotly_chart(fig_cot, use_container_width=True)
 
 with col_r:
