@@ -341,3 +341,11 @@ def macro_dashboard():
 # ==========================================
 # MAIN CONTROLLER
 # ==========================================
+if not st.session_state['logged_in']:
+    login_page()
+else:
+    render_navbar()
+    if st.session_state['current_page'] == 'home': home_page()
+    elif st.session_state['current_page'] == 'macro': macro_dashboard()
+    elif st.session_state['current_page'] == 'reports': reports_page()
+    elif st.session_state['current_page'] == 'admin': admin_panel()
