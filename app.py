@@ -24,11 +24,11 @@ except:
     st.error("API Key missing! Check Streamlit Secrets.")
     st.stop()
 
-# --- Helper Function for Consistent UI ---
+# --- Helper Function (Updated: Title Color White) ---
 def draw_meter(col, name, latest, prev, info_next, msg, dxy_b, gold_b, color, bg, height=280):
     with col:
-        # Title adjustments to prevent cutting off
-        st.markdown(f"<p style='text-align: center; font-weight: bold; margin-bottom: -40px; color: #000; font-size: 16px; position: relative; z-index: 10;'>{name}</p>", unsafe_allow_html=True)
+        # CHANGED: color: #ffffff (White)
+        st.markdown(f"<p style='text-align: center; font-weight: bold; margin-bottom: -40px; color: #ffffff; font-size: 16px; position: relative; z-index: 10;'>{name}</p>", unsafe_allow_html=True)
         
         fig = go.Figure(go.Indicator(
             mode="gauge+number", 
@@ -38,7 +38,6 @@ def draw_meter(col, name, latest, prev, info_next, msg, dxy_b, gold_b, color, bg
                 'axis': {'range': [min(latest, prev)*0.9, max(latest, prev)*1.1]}
             }
         ))
-        # Increased margins to fix "cutting off" issue
         fig.update_layout(height=height, margin=dict(l=30, r=30, t=60, b=0))
         st.plotly_chart(fig, use_container_width=True)
         
@@ -67,7 +66,6 @@ for i, (name, info) in enumerate(main_ind.items()):
         data = fred.get_series(info['id'])
         latest, prev = data.iloc[-1], data.iloc[-2]
         
-        # Logic Fixes
         if 'CPI' in name:
             color, bg = ("#d32f2f", "#fff5f5") if latest > prev else ("#388e3c", "#f1f8e9")
             msg = "Inflation barh rahi hai." if latest > prev else "Inflation cooling hai."
@@ -150,7 +148,8 @@ sentiment = (rep['longs'] / (rep['longs'] + rep['shorts'])) * 100
 
 col_l, col_r = st.columns([1, 1.5])
 with col_l:
-    st.markdown(f"<p style='text-align: center; font-weight: bold; margin-bottom: -30px; color: #000; font-size: 16px;'>Bullish Sentiment Index</p>", unsafe_allow_html=True)
+    # CHANGED: Title Color White
+    st.markdown(f"<p style='text-align: center; font-weight: bold; margin-bottom: -30px; color: #ffffff; font-size: 16px;'>Bullish Sentiment Index</p>", unsafe_allow_html=True)
     fig_cot = go.Figure(go.Indicator(mode="gauge+number", value=sentiment, gauge={'bar': {'color': "#d4af37"}, 'axis': {'range': [0, 100]}}))
     fig_cot.update_layout(height=280, margin=dict(l=20, r=20, t=50, b=0))
     st.plotly_chart(fig_cot, use_container_width=True)
