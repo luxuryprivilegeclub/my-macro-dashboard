@@ -14,10 +14,10 @@ st.set_page_config(
     page_icon="🪙"
 )
 
-# --- 2. DARK THEME & SMART CARDS CSS ---
+# --- 2. DARK PREMIUM CSS (APPLE STYLE) ---
 st.markdown("""
     <style>
-    /* Navbar Styling (Dark Gradient) */
+    /* Navbar Styling */
     .navbar {
         position: fixed;
         top: 0;
@@ -33,9 +33,9 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
     
-    /* Smart Cards (Compact & Dark) */
+    /* Smart Cards */
     .smart-card {
-        background: #1e1e1e; /* Dark Grey */
+        background: #1e1e1e;
         border: 1px solid #333;
         border-radius: 12px;
         padding: 20px;
@@ -45,27 +45,15 @@ st.markdown("""
         margin-bottom: 20px;
     }
     .smart-card:hover {
-        border-color: #d4af37; /* Gold Border on Hover */
+        border-color: #d4af37;
         transform: translateY(-5px);
         box-shadow: 0 8px 15px rgba(212, 175, 55, 0.2);
     }
-    .card-icon {
-        font-size: 30px;
-        margin-bottom: 10px;
-    }
-    .card-title {
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        margin: 0;
-    }
-    .card-desc {
-        color: #aaa;
-        font-size: 12px;
-        margin-top: 5px;
-    }
+    .card-icon { font-size: 30px; margin-bottom: 10px; }
+    .card-title { color: white; font-size: 18px; font-weight: bold; margin: 0; }
+    .card-desc { color: #aaa; font-size: 12px; margin-top: 5px; }
 
-    /* Buttons Override (Gold Accent) */
+    /* Buttons Override */
     div.stButton > button {
         background-color: #262730;
         color: white;
@@ -75,6 +63,12 @@ st.markdown("""
     div.stButton > button:hover {
         border-color: #d4af37;
         color: #d4af37;
+    }
+    
+    /* PDF Embed Fix */
+    embed {
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -91,22 +85,14 @@ if 'username' not in st.session_state: st.session_state['username'] = None
 if 'current_page' not in st.session_state: st.session_state['current_page'] = 'home'
 if 'pdf_archive' not in st.session_state: st.session_state['pdf_archive'] = {} 
 if 'users_db' not in st.session_state:
-    # Dummy DB
     data = {"Username": ["admin", "user"], "Password": ["Rollic@786", "123"], "Role": ["Admin", "User"], "Status": ["Active", "Active"]}
     st.session_state['users_db'] = pd.DataFrame(data)
 
-# --- 5. NAVIGATION BAR (DARK) ---
+# --- 5. NAVIGATION BAR ---
 def render_navbar():
-    st.markdown('<div style="height: 70px;"></div>', unsafe_allow_html=True) # Spacer
+    st.markdown('<div style="height: 70px;"></div>', unsafe_allow_html=True)
     with st.container():
-        # Using columns to simulate a sticky navbar content
-        st.markdown(f"""
-            <div class="navbar">
-                <span style="color: #d4af37; font-weight: bold; font-size: 18px; margin-right: 20px;">🪙 ROLLIC TRADES</span>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Buttons below the visual navbar strip
+        st.markdown(f"""<div class="navbar"><span style="color: #d4af37; font-weight: bold; font-size: 18px; margin-right: 20px;">🪙 ROLLIC TRADES</span></div>""", unsafe_allow_html=True)
         col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
         with col1:
             if st.button("🏠 Home", use_container_width=True): st.session_state['current_page'] = 'home'; st.rerun()
@@ -127,112 +113,71 @@ def render_navbar():
 def login_page():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        st.markdown(f"""
-            <div style="text-align: center; margin-top: 50px;">
-                <img src="{LOGO_URL}" width="150" style="border-radius: 50%; border: 3px solid #d4af37;">
-                <h2 style="color: white; margin-top: 15px;">ROLLIC TRADES</h2>
-            </div>
-        """, unsafe_allow_html=True)
-        
+        st.markdown(f"""<div style="text-align: center; margin-top: 50px;"><img src="{LOGO_URL}" width="150" style="border-radius: 50%; border: 3px solid #d4af37;"><h2 style="color: white; margin-top: 15px;">ROLLIC TRADES</h2></div>""", unsafe_allow_html=True)
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
-        
         if st.button("Login Access", use_container_width=True):
             db = st.session_state['users_db']
             match = db[(db['Username'] == username) & (db['Password'] == password)]
             if not match.empty:
-                st.session_state['logged_in'] = True
-                st.session_state['user_role'] = match.iloc[0]['Role']
-                st.session_state['username'] = username
-                st.rerun()
-            else:
-                st.error("Access Denied")
+                st.session_state['logged_in'] = True; st.session_state['user_role'] = match.iloc[0]['Role']; st.session_state['username'] = username; st.rerun()
+            else: st.error("Access Denied")
 
 # ==========================================
-# PAGE: HOME (SMART BOXES)
+# PAGE: HOME
 # ==========================================
 def home_page():
     st.markdown(f"<h2 style='text-align:center; color:white;'>Welcome, {st.session_state['username']}</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Grid Layout for Smart Boxes (4 Columns - Future Proof)
     c1, c2, c3, c4 = st.columns(4)
-    
     with c1:
-        st.markdown("""
-        <div class="smart-card">
-            <div class="card-icon">📊</div>
-            <p class="card-title">Macro Terminal</p>
-            <p class="card-desc">Live Data & Yields</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Open Terminal", key="btn_macro", use_container_width=True):
-            st.session_state['current_page'] = 'macro'
-            st.rerun()
-            
+        st.markdown("""<div class="smart-card"><div class="card-icon">📊</div><p class="card-title">Macro Terminal</p><p class="card-desc">Live Data & Yields</p></div>""", unsafe_allow_html=True)
+        if st.button("Open Terminal", use_container_width=True): st.session_state['current_page'] = 'macro'; st.rerun()
     with c2:
-        st.markdown("""
-        <div class="smart-card">
-            <div class="card-icon">📄</div>
-            <p class="card-title">Daily Reports</p>
-            <p class="card-desc">PDF Analysis & Levels</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("View Reports", key="btn_reports", use_container_width=True):
-            st.session_state['current_page'] = 'reports'
-            st.rerun()
-            
-    # Future Placeholders (Empty for now)
-    with c3:
-        st.markdown("""
-        <div class="smart-card" style="opacity: 0.5;">
-            <div class="card-icon">🚀</div>
-            <p class="card-title">Signals (Coming Soon)</p>
-            <p class="card-desc">Live Trade Alerts</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with c4:
-        st.markdown("""
-        <div class="smart-card" style="opacity: 0.5;">
-            <div class="card-icon">🎓</div>
-            <p class="card-title">Academy (Coming Soon)</p>
-            <p class="card-desc">Learning Resources</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="smart-card"><div class="card-icon">📄</div><p class="card-title">Daily Reports</p><p class="card-desc">PDF Analysis</p></div>""", unsafe_allow_html=True)
+        if st.button("View Reports", use_container_width=True): st.session_state['current_page'] = 'reports'; st.rerun()
+    with c3: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div class="card-icon">🚀</div><p class="card-title">Signals</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
+    with c4: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div class="card-icon">🎓</div><p class="card-title">Academy</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
 
 # ==========================================
 # PAGE: ADMIN PANEL
 # ==========================================
 def admin_panel():
     st.markdown("<h2 style='text-align: center; color: #d4af37;'>ADMIN CONSOLE</h2>", unsafe_allow_html=True)
-    
     tab1, tab2 = st.tabs(["📄 Upload Reports", "👥 User DB"])
     
     with tab1:
         st.markdown("### Upload Daily PDF")
-        uploaded_file = st.file_uploader("Select PDF", type="pdf")
-        report_date = st.date_input("Date", datetime.now())
+        uploaded_file = st.file_uploader("Select PDF File", type="pdf")
+        report_date = st.date_input("Report Date", datetime.now())
         
         if st.button("Upload Report"):
             if uploaded_file:
+                # Optimized Base64 Encoding
                 bytes_data = uploaded_file.getvalue()
                 b64 = base64.b64encode(bytes_data).decode('utf-8')
                 date_key = report_date.strftime("%Y-%m-%d")
                 st.session_state['pdf_archive'][date_key] = b64
-                st.success(f"Uploaded for {date_key}")
-    
+                st.success(f"Report for {date_key} Uploaded Successfully!")
+                time.sleep(1)
+            else:
+                st.error("Please select a file.")
+
     with tab2:
         st.dataframe(st.session_state['users_db'], use_container_width=True)
 
 # ==========================================
-# PAGE: REPORTS PAGE
+# PAGE: REPORTS PAGE (FIXED & OPTIMIZED)
 # ==========================================
 def reports_page():
     st.markdown("## 📄 Daily Market Reports")
     col1, col2 = st.columns([1, 4])
+    
     with col1:
+        st.markdown("### 🗓 Archives")
         dates = list(st.session_state['pdf_archive'].keys())
+        dates.sort(reverse=True) # Show latest first
+        
         if dates:
             sel_date = st.selectbox("Select Date", dates)
         else:
@@ -242,11 +187,23 @@ def reports_page():
     with col2:
         if sel_date:
             b64_pdf = st.session_state['pdf_archive'][sel_date]
-            pdf_display = f'<iframe src="data:application/pdf;base64,{b64_pdf}#toolbar=0" width="100%" height="800"></iframe>'
+            
+            # THE FIX: Using <embed> tag with 'FitH' (Fit Horizontal)
+            # This makes it behave like a webpage part, not a window
+            pdf_display = f"""
+                <embed
+                    src="data:application/pdf;base64,{b64_pdf}#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+                    type="application/pdf"
+                    width="100%"
+                    height="1000px"
+                />
+            """
             st.markdown(pdf_display, unsafe_allow_html=True)
+        else:
+            st.info("Please select a date from the sidebar to view the report.")
 
 # ==========================================
-# PAGE: MACRO DASHBOARD (FULL CODE)
+# PAGE: MACRO DASHBOARD
 # ==========================================
 def macro_dashboard():
     # --- HEADER ---
