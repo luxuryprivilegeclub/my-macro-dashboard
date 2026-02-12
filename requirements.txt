@@ -1,3 +1,4 @@
-fredapi
 streamlit
+fredapi
 plotly
+pandas
