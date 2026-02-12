@@ -15,7 +15,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # API Key - Yahan apni original key enter karein
-API_KEY = "YOUR_API_KEY_HERE" 
+API_KEY = "7907dc084d9aa52bbe59276c20691708" 
 fred = Fred(api_key=API_KEY)
 
 # Indicators
