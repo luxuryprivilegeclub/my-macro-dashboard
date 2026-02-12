@@ -8,7 +8,7 @@ st.set_page_config(page_title="Macro Dashboard", layout="wide")
 
 # --- Logo Section (New) ---
 # Google Drive direct link format
-logo_url = "https://drive.google.com/uc?id=1-36UuU6RvF1A3vC3y7GiS3rhNyohp_am"
+logo_url = "https://images.unsplash.com/photo-1770873203758-454d9b08bcab?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D"
 
 # Use columns to center the logo
 # [1, 2, 1] ratio means the middle column is twice as wide as side columns
