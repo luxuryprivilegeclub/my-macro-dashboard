@@ -6,17 +6,35 @@ from datetime import datetime
 # Page setup
 st.set_page_config(page_title="Macro Dashboard", layout="wide")
 
-# Custom CSS for Title
+# --- Logo Section (New) ---
+# Google Drive direct link format
+logo_url = "https://drive.google.com/uc?id=1-36UuU6RvF1A3vC3y7GiS3rhNyohp_am"
+
+# Use columns to center the logo
+# [1, 2, 1] ratio means the middle column is twice as wide as side columns
+col1, col2, col3 = st.columns([1, 2, 1])
+
+with col2:
+    # Display logo in the middle column. Adjust width as needed.
+    st.image(logo_url, width=300)
+
+# --- Title Section ---
+# Custom CSS for Title (Updated margin-top for spacing below logo)
 st.markdown("""
-    <div style="background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); padding: 20px; border-radius: 15px; text-align: center; color: white; margin-bottom: 30px;">
+    <div style="background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); padding: 20px; border-radius: 15px; text-align: center; color: white; margin-bottom: 30px; margin-top: 20px;">
         <h1 style="margin: 0;">Macro Economic Live Dashboard</h1>
         <p style="margin: 5px 0 0 0; opacity: 0.8;">FRED API Live Data Tracking | Rollic Trades</p>
     </div>
 """, unsafe_allow_html=True)
 
-# API Key - Yahan apni original key enter karein
-API_KEY = "7907dc084d9aa52bbe59276c20691708" 
-fred = Fred(api_key=API_KEY)
+# API Key Setup (Using Streamlit Secrets for security)
+# Make sure you have added FRED_API_KEY in Streamlit Cloud Settings -> Secrets
+try:
+    API_KEY = st.secrets["FRED_API_KEY"]
+    fred = Fred(api_key=API_KEY)
+except Exception as e:
+    st.error("API Key not found! Please set FRED_API_KEY in Streamlit Secrets.")
+    st.stop()
 
 # Indicators
 indicators = {
@@ -30,10 +48,14 @@ indicators = {
 col1, col2 = st.columns(2)
 
 for i, (name, s_id) in enumerate(indicators.items()):
-    # Data Fetching
-    data = fred.get_series(s_id)
-    latest = data.iloc[-1]
-    previous = data.iloc[-2]
+    # Data Fetching with Error Handling
+    try:
+        data = fred.get_series(s_id)
+        latest = data.iloc[-1]
+        previous = data.iloc[-2]
+    except Exception as e:
+        st.warning(f"Could not fetch data for {name}. Check API Key or FRED service.")
+        continue
     
     # Logic Settings
     impact_msg = ""
