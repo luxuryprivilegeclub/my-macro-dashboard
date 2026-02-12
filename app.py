@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from fredapi import Fred
 import plotly.graph_objects as go
-from datetime import datetime, timedelta
+from datetime import datetime
 import base64
 import time
 
@@ -14,62 +14,44 @@ st.set_page_config(
     page_icon="🪙"
 )
 
-# --- 2. DARK PREMIUM CSS (APPLE STYLE) ---
+# --- 2. DARK PREMIUM CSS ---
 st.markdown("""
     <style>
-    /* Navbar Styling */
+    /* Navbar */
     .navbar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 60px;
+        position: fixed; top: 0; left: 0; width: 100%; height: 60px;
         background: linear-gradient(90deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-        border-bottom: 2px solid #d4af37;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        border-bottom: 2px solid #d4af37; z-index: 99999;
+        display: flex; align-items: center; justify-content: center;
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    
+    /* Report Image Styling */
+    .report-img {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 0px; /* Seamless look */
+        display: block;
     }
     
     /* Smart Cards */
     .smart-card {
-        background: #1e1e1e;
-        border: 1px solid #333;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        margin-bottom: 20px;
+        background: #1e1e1e; border: 1px solid #333; border-radius: 12px;
+        padding: 20px; text-align: center; transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 20px;
     }
     .smart-card:hover {
-        border-color: #d4af37;
-        transform: translateY(-5px);
+        border-color: #d4af37; transform: translateY(-5px);
         box-shadow: 0 8px 15px rgba(212, 175, 55, 0.2);
     }
-    .card-icon { font-size: 30px; margin-bottom: 10px; }
     .card-title { color: white; font-size: 18px; font-weight: bold; margin: 0; }
     .card-desc { color: #aaa; font-size: 12px; margin-top: 5px; }
 
-    /* Buttons Override */
+    /* Buttons */
     div.stButton > button {
-        background-color: #262730;
-        color: white;
-        border: 1px solid #555;
-        border-radius: 8px;
+        background-color: #262730; color: white; border: 1px solid #555; border-radius: 8px;
     }
-    div.stButton > button:hover {
-        border-color: #d4af37;
-        color: #d4af37;
-    }
-    
-    /* PDF Embed Fix */
-    embed {
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    }
+    div.stButton > button:hover { border-color: #d4af37; color: #d4af37; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -83,12 +65,12 @@ if 'logged_in' not in st.session_state: st.session_state['logged_in'] = False
 if 'user_role' not in st.session_state: st.session_state['user_role'] = None
 if 'username' not in st.session_state: st.session_state['username'] = None
 if 'current_page' not in st.session_state: st.session_state['current_page'] = 'home'
-if 'pdf_archive' not in st.session_state: st.session_state['pdf_archive'] = {} 
+if 'report_images' not in st.session_state: st.session_state['report_images'] = {} 
 if 'users_db' not in st.session_state:
     data = {"Username": ["admin", "user"], "Password": ["Rollic@786", "123"], "Role": ["Admin", "User"], "Status": ["Active", "Active"]}
     st.session_state['users_db'] = pd.DataFrame(data)
 
-# --- 5. NAVIGATION BAR ---
+# --- 5. NAVBAR ---
 def render_navbar():
     st.markdown('<div style="height: 70px;"></div>', unsafe_allow_html=True)
     with st.container():
@@ -131,43 +113,51 @@ def home_page():
     st.markdown("<br>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.markdown("""<div class="smart-card"><div class="card-icon">📊</div><p class="card-title">Macro Terminal</p><p class="card-desc">Live Data & Yields</p></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="smart-card"><div style="font-size:30px;">📊</div><p class="card-title">Macro Terminal</p><p class="card-desc">Live Data & Yields</p></div>""", unsafe_allow_html=True)
         if st.button("Open Terminal", use_container_width=True): st.session_state['current_page'] = 'macro'; st.rerun()
     with c2:
-        st.markdown("""<div class="smart-card"><div class="card-icon">📄</div><p class="card-title">Daily Reports</p><p class="card-desc">PDF Analysis</p></div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="smart-card"><div style="font-size:30px;">📄</div><p class="card-title">Daily Reports</p><p class="card-desc">Market Analysis</p></div>""", unsafe_allow_html=True)
         if st.button("View Reports", use_container_width=True): st.session_state['current_page'] = 'reports'; st.rerun()
-    with c3: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div class="card-icon">🚀</div><p class="card-title">Signals</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
-    with c4: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div class="card-icon">🎓</div><p class="card-title">Academy</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
+    with c3: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div style="font-size:30px;">🚀</div><p class="card-title">Signals</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
+    with c4: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div style="font-size:30px;">🎓</div><p class="card-title">Academy</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# PAGE: ADMIN PANEL
+# PAGE: ADMIN PANEL (DIRECT IMAGE UPLOAD)
 # ==========================================
 def admin_panel():
     st.markdown("<h2 style='text-align: center; color: #d4af37;'>ADMIN CONSOLE</h2>", unsafe_allow_html=True)
     tab1, tab2 = st.tabs(["📄 Upload Reports", "👥 User DB"])
     
     with tab1:
-        st.markdown("### Upload Daily PDF")
-        uploaded_file = st.file_uploader("Select PDF File", type="pdf")
+        st.markdown("### Upload Report Images (PNG/JPG)")
+        st.info("You can select multiple images at once. They will be shown in order.")
+        
+        # Accept Multiple Files (Images Only)
+        uploaded_files = st.file_uploader("Select Images", type=['png', 'jpg', 'jpeg'], accept_multiple_files=True)
         report_date = st.date_input("Report Date", datetime.now())
         
-        if st.button("Upload Report"):
-            if uploaded_file:
-                # Optimized Base64 Encoding
-                bytes_data = uploaded_file.getvalue()
-                b64 = base64.b64encode(bytes_data).decode('utf-8')
+        if st.button("Publish Report Images"):
+            if uploaded_files:
+                images_list = []
+                for file in uploaded_files:
+                    # Convert each image to Base64
+                    bytes_data = file.getvalue()
+                    b64_img = base64.b64encode(bytes_data).decode('utf-8')
+                    images_list.append(b64_img)
+                
+                # Save List to Session State
                 date_key = report_date.strftime("%Y-%m-%d")
-                st.session_state['pdf_archive'][date_key] = b64
-                st.success(f"Report for {date_key} Uploaded Successfully!")
-                time.sleep(1)
+                st.session_state['report_images'][date_key] = images_list
+                
+                st.success(f"✅ Published {len(images_list)} images for {date_key}!")
             else:
-                st.error("Please select a file.")
+                st.error("Please select at least one image.")
 
     with tab2:
         st.dataframe(st.session_state['users_db'], use_container_width=True)
 
 # ==========================================
-# PAGE: REPORTS PAGE (FIXED & OPTIMIZED)
+# PAGE: REPORTS PAGE (IMAGE VIEWER)
 # ==========================================
 def reports_page():
     st.markdown("## 📄 Daily Market Reports")
@@ -175,43 +165,34 @@ def reports_page():
     
     with col1:
         st.markdown("### 🗓 Archives")
-        dates = list(st.session_state['pdf_archive'].keys())
-        dates.sort(reverse=True) # Show latest first
+        dates = list(st.session_state['report_images'].keys())
+        dates.sort(reverse=True)
         
         if dates:
             sel_date = st.selectbox("Select Date", dates)
         else:
             sel_date = None
-            st.warning("No Reports")
+            st.warning("No Reports Uploaded")
             
     with col2:
         if sel_date:
-            b64_pdf = st.session_state['pdf_archive'][sel_date]
+            images = st.session_state['report_images'][sel_date]
             
-            # THE FIX: Using <embed> tag with 'FitH' (Fit Horizontal)
-            # This makes it behave like a webpage part, not a window
-            pdf_display = f"""
-                <embed
-                    src="data:application/pdf;base64,{b64_pdf}#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
-                    type="application/pdf"
-                    width="100%"
-                    height="1000px"
-                />
-            """
-            st.markdown(pdf_display, unsafe_allow_html=True)
+            # Display Images sequentially
+            for img_b64 in images:
+                st.markdown(
+                    f'<img src="data:image/png;base64,{img_b64}" class="report-img">', 
+                    unsafe_allow_html=True
+                )
+                st.markdown("<br>", unsafe_allow_html=True) # Spacing between pages
         else:
-            st.info("Please select a date from the sidebar to view the report.")
+            st.info("Please select a date from the sidebar.")
 
 # ==========================================
 # PAGE: MACRO DASHBOARD
 # ==========================================
 def macro_dashboard():
-    # --- HEADER ---
-    st.markdown("""<div style="background: linear-gradient(90deg, #0f2027 0%, #203a43 50%, #2c5364 100%); padding: 20px; border-radius: 15px; text-align: center; color: white; margin-bottom: 25px;">
-        <h1 style="margin: 0; font-family: 'Arial Black', sans-serif;">ROLLIC TRADES MACRO TERMINAL</h1>
-        <p style="margin: 5px 0 0 0; opacity: 0.8; font-size: 14px;">Institutional Grade Analysis</p>
-    </div>""", unsafe_allow_html=True)
-
+    st.markdown("""<div style="background: linear-gradient(90deg, #0f2027 0%, #203a43 50%, #2c5364 100%); padding: 20px; border-radius: 15px; text-align: center; color: white; margin-bottom: 25px;"><h1 style="margin: 0; font-family: 'Arial Black', sans-serif;">ROLLIC TRADES MACRO TERMINAL</h1><p style="margin: 5px 0 0 0; opacity: 0.8; font-size: 14px;">Institutional Grade Analysis</p></div>""", unsafe_allow_html=True)
     try:
         API_KEY = st.secrets["FRED_API_KEY"]
         fred = Fred(api_key=API_KEY)
@@ -225,14 +206,7 @@ def macro_dashboard():
             fig = go.Figure(go.Indicator(mode="gauge+number", value=latest, gauge={'bar': {'color': color}, 'axis': {'range': [min(latest, prev)*0.9, max(latest, prev)*1.1]}}))
             fig.update_layout(height=height, margin=dict(l=30, r=30, t=60, b=0))
             st.plotly_chart(fig, use_container_width=True)
-            st.markdown(f"""<div style="background:{bg}; border:1px solid {color}44; padding:12px; border-radius:12px; text-align:center; margin:-30px auto 35px auto; max-width: 290px;">
-                <p style="margin:0; font-size:12px; font-weight:500; color:#333;">{msg}</p>
-                <div style="margin-top:8px;">
-                    <span style="background:#1e3c72; color:white; padding:3px 10px; border-radius:6px; font-size:10px; font-weight:bold; display:inline-block;">{dxy_b}</span>
-                    <span style="background:#d4af37; color:black; padding:3px 10px; border-radius:6px; font-size:10px; font-weight:bold; display:inline-block;">{gold_b}</span>
-                </div>
-                <p style="margin-top:10px; color:#000; font-size:11px; font-weight:bold;">📅 Next: {info_next}</p>
-            </div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div style="background:{bg}; border:1px solid {color}44; padding:12px; border-radius:12px; text-align:center; margin:-30px auto 35px auto; max-width: 290px;"><p style="margin:0; font-size:12px; font-weight:500; color:#333;">{msg}</p><div style="margin-top:8px;"><span style="background:#1e3c72; color:white; padding:3px 10px; border-radius:6px; font-size:10px; font-weight:bold; display:inline-block;">{dxy_b}</span> <span style="background:#d4af37; color:black; padding:3px 10px; border-radius:6px; font-size:10px; font-weight:bold; display:inline-block;">{gold_b}</span></div><p style="margin-top:10px; color:#000; font-size:11px; font-weight:bold;">📅 Next: {info_next}</p></div>""", unsafe_allow_html=True)
 
     # Section 1
     st.markdown("<h2 style='text-align: center; color: #2c3e50;'>📌 Primary Gold & DXY Drivers</h2>", unsafe_allow_html=True)
