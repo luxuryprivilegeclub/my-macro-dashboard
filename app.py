@@ -26,12 +26,41 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
     
-    /* Report Image Styling */
+    /* Zero Gap Report Images */
+    .report-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+    }
     .report-img {
         width: 100%;
-        border-radius: 8px;
-        margin-bottom: 0px; /* Seamless look */
+        max-width: 1000px; /* High Res Width */
         display: block;
+        margin: 0;
+        padding: 0;
+        border: none;
+    }
+    
+    /* Footer Styling */
+    .footer {
+        width: 100%;
+        background-color: #0e1117;
+        padding: 40px 20px;
+        border-top: 1px solid #333;
+        margin-top: 50px;
+        color: #666;
+        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .footer-logo-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
     }
     
     /* Smart Cards */
@@ -47,7 +76,7 @@ st.markdown("""
     .card-title { color: white; font-size: 18px; font-weight: bold; margin: 0; }
     .card-desc { color: #aaa; font-size: 12px; margin-top: 5px; }
 
-    /* Buttons */
+    /* Buttons Override */
     div.stButton > button {
         background-color: #262730; color: white; border: 1px solid #555; border-radius: 8px;
     }
@@ -70,7 +99,8 @@ if 'users_db' not in st.session_state:
     data = {"Username": ["admin", "user"], "Password": ["Rollic@786", "123"], "Role": ["Admin", "User"], "Status": ["Active", "Active"]}
     st.session_state['users_db'] = pd.DataFrame(data)
 
-# --- 5. NAVBAR ---
+# --- 5. COMPONENT FUNCTIONS ---
+
 def render_navbar():
     st.markdown('<div style="height: 70px;"></div>', unsafe_allow_html=True)
     with st.container():
@@ -88,6 +118,22 @@ def render_navbar():
         with col5:
             if st.button("Log Out", use_container_width=True): st.session_state['logged_in'] = False; st.rerun()
     st.markdown("---")
+
+def render_footer():
+    st.markdown(f"""
+        <div class="footer">
+            <div class="footer-logo-row">
+                <img src="{LOGO_URL}" width="40" style="border-radius: 50%; border: 2px solid #444; margin-right: 15px;">
+                <span style="color: #d4af37; font-weight: bold; font-size: 16px; letter-spacing: 1px;">ROLLIC TRADES</span>
+            </div>
+            <p style="max-width: 800px; line-height: 1.5;">
+                <strong>Risk Disclaimer:</strong> Trading foreign exchange, gold, and indices carries a high level of risk and may not be suitable for all investors. 
+                Past performance is not indicative of future results. The analysis provided here is for educational purposes only and should not be construed as financial advice. 
+                Trade responsibly and manage your risk properly.
+            </p>
+            <p style="margin-top: 15px; color: #444;">© 2026 Rollic Trades. All Rights Reserved.</p>
+        </div>
+    """, unsafe_allow_html=True)
 
 # ==========================================
 # PAGE: LOGIN
@@ -122,7 +168,7 @@ def home_page():
     with c4: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div style="font-size:30px;">🎓</div><p class="card-title">Academy</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
 
 # ==========================================
-# PAGE: ADMIN PANEL (DIRECT IMAGE UPLOAD)
+# PAGE: ADMIN PANEL
 # ==========================================
 def admin_panel():
     st.markdown("<h2 style='text-align: center; color: #d4af37;'>ADMIN CONSOLE</h2>", unsafe_allow_html=True)
@@ -130,9 +176,7 @@ def admin_panel():
     
     with tab1:
         st.markdown("### Upload Report Images (PNG/JPG)")
-        st.info("You can select multiple images at once. They will be shown in order.")
-        
-        # Accept Multiple Files (Images Only)
+        st.info("Select multiple images. They will be shown as one continuous report.")
         uploaded_files = st.file_uploader("Select Images", type=['png', 'jpg', 'jpeg'], accept_multiple_files=True)
         report_date = st.date_input("Report Date", datetime.now())
         
@@ -140,15 +184,11 @@ def admin_panel():
             if uploaded_files:
                 images_list = []
                 for file in uploaded_files:
-                    # Convert each image to Base64
                     bytes_data = file.getvalue()
                     b64_img = base64.b64encode(bytes_data).decode('utf-8')
                     images_list.append(b64_img)
-                
-                # Save List to Session State
                 date_key = report_date.strftime("%Y-%m-%d")
                 st.session_state['report_images'][date_key] = images_list
-                
                 st.success(f"✅ Published {len(images_list)} images for {date_key}!")
             else:
                 st.error("Please select at least one image.")
@@ -157,36 +197,46 @@ def admin_panel():
         st.dataframe(st.session_state['users_db'], use_container_width=True)
 
 # ==========================================
-# PAGE: REPORTS PAGE (IMAGE VIEWER)
+# PAGE: REPORTS PAGE (REDESIGNED)
 # ==========================================
 def reports_page():
-    st.markdown("## 📄 Daily Market Reports")
-    col1, col2 = st.columns([1, 4])
+    # --- HEADER SECTION ---
+    # Centered Logo & Title, Right Dropdown
+    col_l, col_c, col_r = st.columns([1, 2, 1])
     
-    with col1:
-        st.markdown("### 🗓 Archives")
+    with col_c:
+        st.markdown(f"""
+            <div style="text-align: center;">
+                <img src="{LOGO_URL}" width="100" style="border-radius: 50%; border: 3px solid #d4af37; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);">
+                <h2 style="color: white; margin-top: 10px; margin-bottom: 0;">EXPERT ANALYSIS</h2>
+                <p style="color: #888; font-size: 14px; letter-spacing: 2px;">DAILY MARKET REPORT</p>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    with col_r:
         dates = list(st.session_state['report_images'].keys())
         dates.sort(reverse=True)
-        
         if dates:
-            sel_date = st.selectbox("Select Date", dates)
+            sel_date = st.selectbox("📅 Archive", dates, label_visibility="visible")
         else:
             sel_date = None
-            st.warning("No Reports Uploaded")
+            st.markdown("<br><p style='text-align:right; color:#666; font-size:12px;'>No Reports Uploaded</p>", unsafe_allow_html=True)
             
-    with col2:
-        if sel_date:
-            images = st.session_state['report_images'][sel_date]
-            
-            # Display Images sequentially
-            for img_b64 in images:
-                st.markdown(
-                    f'<img src="data:image/png;base64,{img_b64}" class="report-img">', 
-                    unsafe_allow_html=True
-                )
-                st.markdown("<br>", unsafe_allow_html=True) # Spacing between pages
-        else:
-            st.info("Please select a date from the sidebar.")
+    st.markdown("---")
+    
+    # --- REPORT DISPLAY (GAP-LESS) ---
+    if sel_date:
+        images = st.session_state['report_images'][sel_date]
+        
+        # HTML Block for Seamless Images
+        html_content = '<div class="report-container">'
+        for img_b64 in images:
+            html_content += f'<img src="data:image/png;base64,{img_b64}" class="report-img">'
+        html_content += '</div>'
+        
+        st.markdown(html_content, unsafe_allow_html=True)
+    else:
+        st.info("No report selected. Please upload from Admin Panel.")
 
 # ==========================================
 # PAGE: MACRO DASHBOARD
@@ -274,9 +324,11 @@ def macro_dashboard():
 # ==========================================
 if not st.session_state['logged_in']:
     login_page()
+    render_footer()
 else:
     render_navbar()
     if st.session_state['current_page'] == 'home': home_page()
     elif st.session_state['current_page'] == 'macro': macro_dashboard()
     elif st.session_state['current_page'] == 'reports': reports_page()
     elif st.session_state['current_page'] == 'admin': admin_panel()
+    render_footer()
