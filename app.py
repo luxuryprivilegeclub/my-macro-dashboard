@@ -16,7 +16,7 @@ col1, col2, col3 = st.columns([1, 2, 1])
 
 with col2:
     # Display logo in the middle column. Adjust width as needed.
-    st.image(logo_url, width=300)
+    st.image(logo_url, width=250)
 
 # --- Title Section ---
 # Custom CSS for Title (Updated margin-top for spacing below logo)
