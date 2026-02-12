@@ -34,18 +34,22 @@ except Exception as e:
     st.error("API Key ka masla hai! Streamlit Secrets mein 'FRED_API_KEY' check karein.")
     st.stop()
 
-# 5. Indicators Dictionary
+# 5. Indicators & Next Release Schedule (2026)
+# Yahan hum ne next dates manually add ki hain jo calendar ke mutabiq hain
 indicators = {
-    'CPI Inflation': 'CPIAUCSL',
-    'NFP (Jobs Data)': 'PAYEMS',
-    'Unemployment Rate': 'UNRATE',
-    'Fed Interest Rate': 'FEDFUNDS'
+    'CPI Inflation': {'id': 'CPIAUCSL', 'next': 'Feb 13, 2026'},
+    'NFP (Jobs Data)': {'id': 'PAYEMS', 'next': 'Mar 06, 2026'},
+    'Unemployment Rate': {'id': 'UNRATE', 'next': 'Mar 06, 2026'},
+    'Fed Interest Rate': {'id': 'FEDFUNDS', 'next': 'Mar 18, 2026'}
 }
 
 # 6. Grid Layout (2 Columns)
 col1, col2 = st.columns(2)
 
-for i, (name, s_id) in enumerate(indicators.items()):
+for i, (name, info) in enumerate(indicators.items()):
+    s_id = info['id']
+    next_date = info['next']
+    
     try:
         # Fetching Data
         data = fred.get_series(s_id)
@@ -98,7 +102,7 @@ for i, (name, s_id) in enumerate(indicators.items()):
             fig.update_layout(height=280, margin=dict(l=30, r=30, t=50, b=0))
             st.plotly_chart(fig, use_container_width=True)
 
-            # Centered Analysis Box (Roman Urdu)
+            # Analysis Box (Roman Urdu) + Next Release Date
             st.markdown(f"""
                 <div style="font-family: Arial; padding: 15px; border-radius: 12px; background-color: {bg_light}; 
                             border: 1px solid {color}44; max-width: 380px; margin: -20px auto 40px auto; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
@@ -107,6 +111,9 @@ for i, (name, s_id) in enumerate(indicators.items()):
                                 border-radius: 8px; font-size: 13px; font-weight: bold; display: inline-block;">
                         {bias}
                     </div>
+                    <p style="margin: 10px 0 0 0; color: #777; font-size: 12px; font-style: italic;">
+                        📅 <b>Next Release:</b> {next_date}
+                    </p>
                 </div>
             """, unsafe_allow_html=True)
             
