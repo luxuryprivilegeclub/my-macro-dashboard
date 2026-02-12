@@ -1,4 +1,4 @@
-streamlit
-fredapi
-plotly
-pandas
+streamlit==1.45.1
+pandas==2.2.3
+plotly==6.0.1
+fredapi==0.5.2
