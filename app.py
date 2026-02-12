@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 import base64
 import time
+import streamlit.components.v1 as components  # HTML Component ke liye
 
 # --- 1. PAGE CONFIGURATION ---
 st.set_page_config(
@@ -26,7 +27,7 @@ st.markdown("""
         box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
     
-    /* Zero Gap Report Images */
+    /* Report Image Styling */
     .report-container {
         width: 100%;
         display: flex;
@@ -36,7 +37,7 @@ st.markdown("""
     }
     .report-img {
         width: 100%;
-        max-width: 1000px; /* High Res Width */
+        max-width: 1000px;
         display: block;
         margin: 0;
         padding: 0;
@@ -89,6 +90,93 @@ ADMIN_USER = "admin"
 ADMIN_PASS = "Rollic@786"
 LOGO_URL = "https://images.unsplash.com/photo-1770873203758-454d9b08bcab?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8MXx8fGVufDB8fHx8fA%3D%3D"
 
+# --- YOUR CALCULATOR HTML CODE (Embedded directly) ---
+CALCULATOR_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1A1A1A;
+            --text-color: #D4AF37;
+            --primary-color: #B8860B;
+            --secondary-color: #D4AF37;
+            --container-bg: rgba(26, 26, 26, 0.95);
+            --input-border: #B8860B;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body {
+            background-color: transparent; /* Transparent to blend with Streamlit */
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-color);
+        }
+        .container {
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 0 25px var(--primary-color);
+            width: 100%;
+            max-width: 500px;
+            border: 2px solid var(--primary-color);
+            animation: containerEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            text-align: center;
+        }
+        @keyframes containerEntrance { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        h1 { color: var(--primary-color); margin-bottom: 25px; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; color: var(--primary-color); font-weight: 600; }
+        input {
+            width: 100%; padding: 12px; border: 2px solid var(--input-border); border-radius: 10px; font-size: 1rem;
+            background: #111; color: #fff; font-weight: 600; box-shadow: 0 0 5px var(--primary-color);
+        }
+        input:focus { outline: none; box-shadow: 0 0 15px var(--primary-color); }
+        button {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #1A1A1A; border: none; border-radius: 10px; font-size: 1.1rem; cursor: pointer;
+            font-weight: 600; text-transform: uppercase; margin-top: 20px;
+        }
+        button:hover { opacity: 0.9; }
+        #riskAmount { margin-top: 25px; font-size: 1.5rem; color: var(--primary-color); font-weight: bold; display: none; }
+        #result { margin-top: 15px; font-size: 2.5rem; font-weight: bold; color: var(--secondary-color); display: none; }
+        .message { color: var(--secondary-color); margin-top: 15px; font-weight: 500; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lot Size Calculator</h1>
+        <div class="input-group"><label>Account Size ($)</label><input type="number" id="accountSize" placeholder="Enter balance"></div>
+        <div class="input-group"><label>Risk Percentage (%)</label><input type="number" id="riskPercent" placeholder="Enter risk %"></div>
+        <div class="input-group"><label>Stop Loss (Pips)</label><input type="number" id="stopLoss" placeholder="Enter stop loss"></div>
+        <button onclick="calculateLotSize()">Calculate Lot Size</button>
+        <div id="riskAmount"></div>
+        <div id="result"></div>
+        <div class="message" id="message">Secured & Calculated! Now Go and Trade.</div>
+    </div>
+    <script>
+        function calculateLotSize() {
+            const accountSize = parseFloat(document.getElementById('accountSize').value);
+            const riskPercent = parseFloat(document.getElementById('riskPercent').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            if (!accountSize || !riskPercent || !stopLoss) { alert('Please fill all fields'); return; }
+            const riskAmount = (accountSize * riskPercent) / 100;
+            const lotSize = (riskAmount / (stopLoss * 10)).toFixed(2);
+            document.getElementById('riskAmount').textContent = `Risk Amount: $${riskAmount.toFixed(2)}`;
+            document.getElementById('result').textContent = `${lotSize} Lot`;
+            document.getElementById('riskAmount').style.display = 'block';
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('message').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+"""
+
 # --- 4. SESSION STATE ---
 if 'logged_in' not in st.session_state: st.session_state['logged_in'] = False
 if 'user_role' not in st.session_state: st.session_state['user_role'] = None
@@ -105,7 +193,7 @@ def render_navbar():
     st.markdown('<div style="height: 70px;"></div>', unsafe_allow_html=True)
     with st.container():
         st.markdown(f"""<div class="navbar"><span style="color: #d4af37; font-weight: bold; font-size: 18px; margin-right: 20px;">🪙 ROLLIC TRADES</span></div>""", unsafe_allow_html=True)
-        col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
+        col1, col2, col3, col4, col5, col6 = st.columns([1, 1, 1, 1, 1, 1])
         with col1:
             if st.button("🏠 Home", use_container_width=True): st.session_state['current_page'] = 'home'; st.rerun()
         with col2:
@@ -113,9 +201,11 @@ def render_navbar():
         with col3:
             if st.button("📄 Reports", use_container_width=True): st.session_state['current_page'] = 'reports'; st.rerun()
         with col4:
+            if st.button("🧮 Calculator", use_container_width=True): st.session_state['current_page'] = 'calculator'; st.rerun()
+        with col5:
             if st.session_state['user_role'] == 'Admin':
                 if st.button("⚙️ Admin", use_container_width=True): st.session_state['current_page'] = 'admin'; st.rerun()
-        with col5:
+        with col6:
             if st.button("Log Out", use_container_width=True): st.session_state['logged_in'] = False; st.rerun()
     st.markdown("---")
 
@@ -152,20 +242,43 @@ def login_page():
             else: st.error("Access Denied")
 
 # ==========================================
-# PAGE: HOME
+# PAGE: HOME (LOGO FIXED & CALCULATOR ADDED)
 # ==========================================
 def home_page():
+    # --- LOGO CENTERED ---
+    st.markdown(f"""
+        <div style="text-align: center; padding-top: 20px; padding-bottom: 10px;">
+            <img src="{LOGO_URL}" width="180" style="border-radius: 50%; border: 4px solid #d4af37; box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);">
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown(f"<h2 style='text-align:center; color:white;'>Welcome, {st.session_state['username']}</h2>", unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
+    
     c1, c2, c3, c4 = st.columns(4)
+    
     with c1:
         st.markdown("""<div class="smart-card"><div style="font-size:30px;">📊</div><p class="card-title">Macro Terminal</p><p class="card-desc">Live Data & Yields</p></div>""", unsafe_allow_html=True)
         if st.button("Open Terminal", use_container_width=True): st.session_state['current_page'] = 'macro'; st.rerun()
+    
     with c2:
         st.markdown("""<div class="smart-card"><div style="font-size:30px;">📄</div><p class="card-title">Daily Reports</p><p class="card-desc">Market Analysis</p></div>""", unsafe_allow_html=True)
         if st.button("View Reports", use_container_width=True): st.session_state['current_page'] = 'reports'; st.rerun()
-    with c3: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div style="font-size:30px;">🚀</div><p class="card-title">Signals</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
+    
+    # --- CALCULATOR BOX (ADDED) ---
+    with c3:
+        st.markdown("""<div class="smart-card"><div style="font-size:30px;">🧮</div><p class="card-title">Risk Calculator</p><p class="card-desc">Lot Size Manager</p></div>""", unsafe_allow_html=True)
+        if st.button("Open Calculator", use_container_width=True): st.session_state['current_page'] = 'calculator'; st.rerun()
+    
     with c4: st.markdown("""<div class="smart-card" style="opacity: 0.5;"><div style="font-size:30px;">🎓</div><p class="card-title">Academy</p><p class="card-desc">Coming Soon</p></div>""", unsafe_allow_html=True)
+
+# ==========================================
+# PAGE: CALCULATOR (NEW)
+# ==========================================
+def calculator_page():
+    st.markdown("<h2 style='text-align: center; color: #d4af37;'>RISK MANAGEMENT TOOL</h2>", unsafe_allow_html=True)
+    # Rendering the HTML component
+    components.html(CALCULATOR_HTML, height=750, scrolling=True)
 
 # ==========================================
 # PAGE: ADMIN PANEL
@@ -197,11 +310,9 @@ def admin_panel():
         st.dataframe(st.session_state['users_db'], use_container_width=True)
 
 # ==========================================
-# PAGE: REPORTS PAGE (REDESIGNED)
+# PAGE: REPORTS PAGE
 # ==========================================
 def reports_page():
-    # --- HEADER SECTION ---
-    # Centered Logo & Title, Right Dropdown
     col_l, col_c, col_r = st.columns([1, 2, 1])
     
     with col_c:
@@ -224,16 +335,12 @@ def reports_page():
             
     st.markdown("---")
     
-    # --- REPORT DISPLAY (GAP-LESS) ---
     if sel_date:
         images = st.session_state['report_images'][sel_date]
-        
-        # HTML Block for Seamless Images
         html_content = '<div class="report-container">'
         for img_b64 in images:
             html_content += f'<img src="data:image/png;base64,{img_b64}" class="report-img">'
         html_content += '</div>'
-        
         st.markdown(html_content, unsafe_allow_html=True)
     else:
         st.info("No report selected. Please upload from Admin Panel.")
@@ -330,5 +437,6 @@ else:
     if st.session_state['current_page'] == 'home': home_page()
     elif st.session_state['current_page'] == 'macro': macro_dashboard()
     elif st.session_state['current_page'] == 'reports': reports_page()
+    elif st.session_state['current_page'] == 'calculator': calculator_page()
     elif st.session_state['current_page'] == 'admin': admin_panel()
     render_footer()
