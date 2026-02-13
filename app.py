@@ -27,6 +27,14 @@ LOGO_URL = "https://images.unsplash.com/photo-1770873203758-454d9b08bcab?w=500&a
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    
+    /* Center the main app container with left/right space */
+    div.block-container {
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        padding-top: 1rem !important;
+    }
+
     .stApp {background:#000;font-family:'Inter',sans-serif;}
     #MainMenu,footer,header{visibility:hidden;}
     div[data-testid="stToolbar"],div[data-testid="stDecoration"],
@@ -623,7 +631,6 @@ def macro_dashboard():
     dxy_price, dxy_prev = get_live_asset("DX-Y.NYB")
     xau_price, xau_prev = get_live_asset("XAUUSD=X")
 
-    # Mock Data as fallback
     if dxy_price == 0.0: dxy_price, dxy_prev = 104.50, 104.20
     if xau_price == 0.0: xau_price, xau_prev = 2350.50, 2340.00
 
@@ -651,7 +658,6 @@ def macro_dashboard():
     ry_dir = "Rising" if ry_latest > ry_prev else ("Falling" if ry_latest < ry_prev else "Flat")
     dxy_dir = "Rising" if dxy_price > dxy_prev else ("Falling" if dxy_price < dxy_prev else "Flat")
 
-    # Detailed Expert Logic Processing
     if ry_dir == "Rising" and dxy_dir == "Rising":
         b_text = "BEARISH 🔴"
         b_col = "#FF453A"
@@ -671,7 +677,6 @@ def macro_dashboard():
         b_glow = "rgba(255,159,10,0.4)"
         logic_desc = f"DXY ({dxy_dir}) aur Real Yield ({ry_dir}) ka correlation is waqt mixed hai (divergence). Market direction decide nahi kar paa rahi. Aise macro environment mein Gold normally range-bound rehta hai ya pure technical levels ko respect karta hai.<br><br><span style='color:#FF9F0A; font-weight:700;'>Result: Wait for clear Macro trend or trade strictly level-to-level.</span>"
 
-    # Ultra-Modern Expert Logic Decoder Card - FIXED HTML PARSING
     card_html = f"""
     <div style="background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95)); border: 1px solid rgba(212,175,55,0.25); border-radius: 24px; padding: 25px 30px; margin-top: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05); position: relative; overflow: hidden;">
         <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, {b_glow} 0%, transparent 70%); filter: blur(30px); opacity: 0.5;"></div>
