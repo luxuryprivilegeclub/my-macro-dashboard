@@ -213,7 +213,6 @@ def render_header():
 def render_ticker_tape():
     tv_ticker = """
     <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.05);margin-bottom:25px;">
-    <!-- TradingView Widget BEGIN -->
     <div class="tradingview-widget-container">
     <div class="tradingview-widget-container__widget"></div>
     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
@@ -236,7 +235,6 @@ def render_ticker_tape():
     }
     </script>
     </div>
-    <!-- TradingView Widget END -->
     </div>
     """
     components.html(tv_ticker, height=78)
@@ -577,7 +575,7 @@ def macro_dashboard():
 
         @st.cache_data(ttl=3600)
         def fetch_fred():
-            smap = {"CPI": "CPIAUCSL", "Fed Rate": "FEDFUNDS", "US 10Y": "DGS10",
+            smap = {"CPI": "CPIAUCSL", "Fed Rate": "FEDFUNDS", "US 10Y": "DGS10", "T10YIE": "T10YIE",
                     "Unemployment": "UNRATE", "GDP Growth": "A191RL1Q225SBEA", "PCE": "PCEPI"}
             results = {}
             for name, sid in smap.items():
@@ -596,6 +594,7 @@ def macro_dashboard():
             "CPI": {'latest': 3.2, 'previous': 3.1, 'change': 0.1},
             "Fed Rate": {'latest': 5.50, 'previous': 5.50, 'change': 0.0},
             "US 10Y": {'latest': 4.26, 'previous': 4.22, 'change': 0.04},
+            "T10YIE": {'latest': 2.30, 'previous': 2.28, 'change': 0.02},
             "Unemployment": {'latest': 4.1, 'previous': 4.0, 'change': 0.1},
             "GDP Growth": {'latest': 2.8, 'previous': 3.0, 'change': -0.2},
             "PCE": {'latest': 2.7, 'previous': 2.6, 'change': 0.1}
@@ -618,6 +617,90 @@ def macro_dashboard():
         fig.update_layout(height=190, margin=dict(l=20, r=20, t=25, b=0),
                           paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
         return fig
+
+    # ====================================================
+    # NEW: TOP 3 CORE MACRO METERS
+    # ====================================================
+    st.markdown(
+        '<p style="font-size:10px;letter-spacing:4px;text-transform:uppercase;'
+        'color:rgba(212,175,55,0.5);font-weight:600;text-align:center;margin-bottom:6px;">CORE DRIVERS</p>'
+        '<p style="font-size:24px;font-weight:800;color:#fff;text-align:center;margin-bottom:20px;">'
+        'Live Market <span style="background:linear-gradient(135deg,#d4af37,#f5d769,#d4af37);'
+        'background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;'
+        'animation:shimmer 3.5s ease-in-out infinite;">Correlations</span></p>',
+        unsafe_allow_html=True
+    )
+
+    def get_live_asset(symbol):
+        try:
+            res = requests.get(f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}",
+                               headers={'User-Agent': 'Mozilla/5.0'}, timeout=2)
+            d = res.json()
+            price = d['chart']['result'][0]['meta']['regularMarketPrice']
+            prev = d['chart']['result'][0]['meta']['chartPreviousClose']
+            return float(price), float(prev)
+        except:
+            return 0.0, 0.0
+
+    dxy_price, dxy_prev = get_live_asset("DX-Y.NYB")
+    xau_price, xau_prev = get_live_asset("XAUUSD=X")
+
+    # Mock Data agar API issue karay
+    if dxy_price == 0.0: dxy_price, dxy_prev = 104.50, 104.20
+    if xau_price == 0.0: xau_price, xau_prev = 2350.50, 2340.00
+
+    us10_latest = fred_data.get('US 10Y', {}).get('latest', 4.26)
+    us10_prev = fred_data.get('US 10Y', {}).get('previous', 4.22)
+    t10_latest = fred_data.get('T10YIE', {}).get('latest', 2.30)
+    t10_prev = fred_data.get('T10YIE', {}).get('previous', 2.28)
+
+    ry_latest = round(us10_latest - t10_latest, 2)
+    ry_prev = round(us10_prev - t10_prev, 2)
+
+    tc1, tc2, tc3 = st.columns(3)
+    with tc1:
+        st.markdown('<div style="text-align:center;"><span style="color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;letter-spacing:1px;">DOLLAR INDEX (DXY)</span></div>', unsafe_allow_html=True)
+        st.plotly_chart(build_gauge(dxy_price, dxy_prev, "#007AFF"), use_container_width=True, key="top_dxy")
+
+    with tc2:
+        st.markdown('<div style="text-align:center;"><span style="color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;letter-spacing:1px;">REAL YIELD (US10Y - T10YIE)</span></div>', unsafe_allow_html=True)
+        st.plotly_chart(build_gauge(ry_latest, ry_prev, "#BF5AF2"), use_container_width=True, key="top_ry")
+
+    with tc3:
+        st.markdown('<div style="text-align:center;"><span style="color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;letter-spacing:1px;">GOLD (XAUUSD)</span></div>', unsafe_allow_html=True)
+        st.plotly_chart(build_gauge(xau_price, xau_prev, "#d4af37"), use_container_width=True, key="top_xau")
+
+    ry_dir = "Rising" if ry_latest > ry_prev else ("Falling" if ry_latest < ry_prev else "Flat")
+    dxy_dir = "Rising" if dxy_price > dxy_prev else ("Falling" if dxy_price < dxy_prev else "Flat")
+
+    if ry_dir == "Rising" and dxy_dir == "Rising":
+        b_text = "BEARISH 🔴"
+        b_col = "#FF453A"
+        logic_desc = "DXY aur Real Yield dono upar ja rahay hain. Ye Gold ke liye sakht <strong>Bearish</strong> environment hai kyunke investors ko cash aur bonds par baghair kisi risk ke behtar return mil raha hai. Gold par selling pressure increase hone ka chance hai."
+    elif ry_dir == "Falling" and dxy_dir == "Falling":
+        b_text = "BULLISH 🟢"
+        b_col = "#30D158"
+        logic_desc = "DXY aur Real Yield dono neechay gir rahay hain. Ye Gold ke liye perfect <strong>Bullish</strong> setup hai. Dollar weak hone aur real returns kam hone ki wajah se smart money Gold (Safe Haven) mein shift ho rahi hai."
+    else:
+        b_text = "MIXED / NEUTRAL 🟡"
+        b_col = "#FF9F0A"
+        logic_desc = f"DXY ({dxy_dir}) aur Real Yield ({ry_dir}) different directions mein move kar rahay hain. Macro correlation clear nahi hai. Aise environment mein technical levels par focus karna zyada behtar hai."
+
+    st.markdown(f'''
+    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:18px;padding:25px;margin-top:10px;">
+        <div style="display:flex;align-items:center;margin-bottom:15px;gap:10px;">
+            <span style="font-size:24px;">🧠</span>
+            <span style="color:#d4af37;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Expert Logic Decoder</span>
+        </div>
+        <p style="color:rgba(255,255,255,0.6);font-size:13px;line-height:1.7;margin-bottom:20px;">{logic_desc}</p>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Gold Macro Bias:</span>
+            <span style="font-size:12px;font-weight:800;color:{b_col};background:rgba(255,255,255,0.05);padding:6px 16px;border-radius:12px;">{b_text}</span>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
+    # ====================================================
 
     items = [
         ("CPI Inflation", "CPI", "#FF453A", "BULLISH", "BEARISH", "Feb 12"),
