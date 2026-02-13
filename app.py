@@ -108,18 +108,9 @@ if 'users_db' not in st.session_state:
         "Created": [datetime.now().strftime("%Y-%m-%d")] * 2
     })
 
-# 10 TOOL BOXES - each has its own content store
 tool_keys = [
-    "macro_terminal",       # 1
-    "money_flow",           # 2
-    "oi_analyzer",          # 3
-    "gold_report",          # 4
-    "forex_report",         # 5
-    "btc_report",           # 6
-    "sp500_report",         # 7
-    "market_news",          # 8
-    "calculator",           # 9
-    "learning",             # 10
+    "macro_terminal", "money_flow", "oi_analyzer", "gold_report", "forex_report",
+    "btc_report", "sp500_report", "market_news", "calculator", "learning",
 ]
 
 tool_meta = {
@@ -135,7 +126,6 @@ tool_meta = {
     "learning": {"name": "Learning Academy", "icon": "🎓", "color": "#30D158", "tag": "LEARN", "desc": "Trading education and strategy courses"},
 }
 
-# Initialize content stores
 for tk in tool_keys:
     store_key = "content_" + tk
     if store_key not in st.session_state:
@@ -327,10 +317,8 @@ def home_page():
     hero_quote = st.session_state['hero_quote']
     hero_sub = st.session_state['hero_subtitle']
 
-    # TRADINGVIEW TICKER - right after menu
     render_ticker_tape()
 
-    # HERO BANNER
     hero_html = (
         '<div style="background:linear-gradient(135deg,rgba(212,175,55,0.06) 0%,rgba(0,0,0,0.9) 40%,rgba(212,175,55,0.04) 100%);'
         'border:1px solid rgba(212,175,55,0.1);border-radius:24px;padding:50px 30px;text-align:center;'
@@ -353,7 +341,6 @@ def home_page():
     )
     st.markdown(hero_html, unsafe_allow_html=True)
 
-    # MARKET OVERVIEW - TradingView
     st.markdown(
         '<p style="font-size:10px;letter-spacing:4px;text-transform:uppercase;'
         'color:rgba(212,175,55,0.5);font-weight:600;text-align:center;margin-bottom:6px;">LIVE MARKETS</p>'
@@ -366,12 +353,7 @@ def home_page():
         unsafe_allow_html=True
     )
 
-    tv_widgets_data = [
-        ("XAUUSD", "OANDA:XAUUSD"),
-        ("EURUSD", "FX:EURUSD"),
-        ("SP500", "FOREXCOM:SPXUSD"),
-        ("BTCUSD", "COINBASE:BTCUSD"),
-    ]
+    tv_widgets_data = [("XAUUSD", "OANDA:XAUUSD"), ("EURUSD", "FX:EURUSD"), ("SP500", "FOREXCOM:SPXUSD"), ("BTCUSD", "COINBASE:BTCUSD")]
 
     w1, w2 = st.columns(2)
     for i, (label, symbol) in enumerate(tv_widgets_data):
@@ -403,7 +385,6 @@ def home_page():
 
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # === TRADER TOOLKIT - 10 BOXES ===
     st.markdown(
         '<p style="font-size:10px;letter-spacing:4px;text-transform:uppercase;'
         'color:rgba(212,175,55,0.5);font-weight:600;text-align:center;margin-bottom:6px;">TRADING SUITE</p>'
@@ -416,7 +397,6 @@ def home_page():
         unsafe_allow_html=True
     )
 
-    # Render boxes in rows of 5
     for row_start in range(0, len(tool_keys), 5):
         row_keys = tool_keys[row_start:row_start + 5]
         cols = st.columns(len(row_keys))
@@ -424,10 +404,7 @@ def home_page():
             meta = tool_meta[tk]
             with col_obj:
                 has_content = bool(st.session_state.get("content_" + tk, ""))
-                if tk == "calculator":
-                    has_content = True
-                if tk == "macro_terminal":
-                    has_content = True
+                if tk in ["calculator", "macro_terminal"]: has_content = True
 
                 if has_content:
                     status_dot = '<span style="width:6px;height:6px;background:#30d158;border-radius:50%;display:inline-block;"></span>'
@@ -459,18 +436,14 @@ def home_page():
                     '<div style="display:flex;align-items:center;justify-content:center;gap:5px;">'
                     + status_dot +
                     '<span style="font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.3);font-weight:600;">'
-                    + status_text + '</span></div>'
-                    '</div>'
+                    + status_text + '</span></div></div>'
                 )
                 st.markdown(card_html, unsafe_allow_html=True)
 
                 if st.button("Open", use_container_width=True, key="open_" + tk):
-                    if tk == "macro_terminal":
-                        st.session_state['current_page'] = 'macro'
-                    elif tk == "calculator":
-                        st.session_state['current_page'] = 'calculator'
-                    else:
-                        st.session_state['current_page'] = 'tool_' + tk
+                    if tk == "macro_terminal": st.session_state['current_page'] = 'macro'
+                    elif tk == "calculator": st.session_state['current_page'] = 'calculator'
+                    else: st.session_state['current_page'] = 'tool_' + tk
                     st.rerun()
 
 
@@ -494,7 +467,6 @@ def tool_page(tool_id):
     )
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    # Special case: market_news
     if tk == "market_news":
         articles = st.session_state['news_articles']
         if articles:
@@ -521,7 +493,6 @@ def tool_page(tool_id):
             st.info("No news articles yet. Admin can add from Admin Panel.")
         return
 
-    # Regular HTML content
     if content:
         components.html(content, height=1500, scrolling=True)
     else:
@@ -633,11 +604,11 @@ def macro_dashboard():
 
     def get_live_asset(symbol):
         try:
-            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d"
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-                'Accept': 'application/json',
-                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
             }
             res = requests.get(url, headers=headers, timeout=5)
             if res.status_code == 200:
@@ -700,17 +671,10 @@ def macro_dashboard():
         b_glow = "rgba(255,159,10,0.4)"
         logic_desc = f"DXY ({dxy_dir}) aur Real Yield ({ry_dir}) ka correlation is waqt mixed hai (divergence). Market direction decide nahi kar paa rahi. Aise macro environment mein Gold normally range-bound rehta hai ya pure technical levels ko respect karta hai.<br><br><span style='color:#FF9F0A; font-weight:700;'>Result: Wait for clear Macro trend or trade strictly level-to-level.</span>"
 
-    # Ultra-Modern Expert Logic Decoder Card
-    st.markdown(f'''
-    <div style="background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95));
-                border: 1px solid rgba(212,175,55,0.25);
-                border-radius: 24px; padding: 25px 30px; margin-top: 20px;
-                box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
-                position: relative; overflow: hidden;">
-        
-        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; 
-                    background: radial-gradient(circle, {b_glow} 0%, transparent 70%); filter: blur(30px); opacity: 0.5;"></div>
-
+    # Ultra-Modern Expert Logic Decoder Card - FIXED HTML PARSING
+    card_html = f"""
+    <div style="background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95)); border: 1px solid rgba(212,175,55,0.25); border-radius: 24px; padding: 25px 30px; margin-top: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, {b_glow} 0%, transparent 70%); filter: blur(30px); opacity: 0.5;"></div>
         <div style="display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
             <div style="display:flex; align-items:center; gap:15px;">
                 <div style="background: rgba(212,175,55,0.1); width:40px; height:40px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size:20px; border:1px solid rgba(212,175,55,0.2);">🧠</div>
@@ -723,13 +687,13 @@ def macro_dashboard():
                 <span style="background:{b_bg}; color:{b_col}; padding:8px 18px; border-radius:20px; font-weight:800; font-size:12px; box-shadow: 0 0 15px {b_glow}; border: 1px solid {b_col}; letter-spacing:1px;">{b_text}</span>
             </div>
         </div>
-
         <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 20px; border-left: 4px solid {b_col};">
             <h4 style="margin:0 0 8px 0; color:#fff; font-size:13px; text-transform:uppercase; letter-spacing:1px;">Current Market Context</h4>
             <p style="margin:0; color:rgba(255,255,255,0.75); font-size:14px; line-height:1.7;">{logic_desc}</p>
         </div>
     </div>
-    ''', unsafe_allow_html=True)
+    """
+    st.markdown(card_html, unsafe_allow_html=True)
     st.markdown("<hr>", unsafe_allow_html=True)
     # ====================================================
 
