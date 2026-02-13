@@ -619,7 +619,7 @@ def macro_dashboard():
         return fig
 
     # ====================================================
-    # NEW: TOP 3 CORE MACRO METERS
+    # NEW: TOP 3 CORE MACRO METERS (Fixed & Beautified)
     # ====================================================
     st.markdown(
         '<p style="font-size:10px;letter-spacing:4px;text-transform:uppercase;'
@@ -633,19 +633,26 @@ def macro_dashboard():
 
     def get_live_asset(symbol):
         try:
-            res = requests.get(f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}",
-                               headers={'User-Agent': 'Mozilla/5.0'}, timeout=2)
-            d = res.json()
-            price = d['chart']['result'][0]['meta']['regularMarketPrice']
-            prev = d['chart']['result'][0]['meta']['chartPreviousClose']
-            return float(price), float(prev)
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+            res = requests.get(url, headers=headers, timeout=5)
+            if res.status_code == 200:
+                d = res.json()
+                price = d['chart']['result'][0]['meta']['regularMarketPrice']
+                prev = d['chart']['result'][0]['meta']['chartPreviousClose']
+                return float(price), float(prev)
+            return 0.0, 0.0
         except:
             return 0.0, 0.0
 
     dxy_price, dxy_prev = get_live_asset("DX-Y.NYB")
     xau_price, xau_prev = get_live_asset("XAUUSD=X")
 
-    # Mock Data agar API issue karay
+    # Mock Data as fallback
     if dxy_price == 0.0: dxy_price, dxy_prev = 104.50, 104.20
     if xau_price == 0.0: xau_price, xau_prev = 2350.50, 2340.00
 
@@ -673,29 +680,53 @@ def macro_dashboard():
     ry_dir = "Rising" if ry_latest > ry_prev else ("Falling" if ry_latest < ry_prev else "Flat")
     dxy_dir = "Rising" if dxy_price > dxy_prev else ("Falling" if dxy_price < dxy_prev else "Flat")
 
+    # Detailed Expert Logic Processing
     if ry_dir == "Rising" and dxy_dir == "Rising":
         b_text = "BEARISH 🔴"
         b_col = "#FF453A"
-        logic_desc = "DXY aur Real Yield dono upar ja rahay hain. Ye Gold ke liye sakht <strong>Bearish</strong> environment hai kyunke investors ko cash aur bonds par baghair kisi risk ke behtar return mil raha hai. Gold par selling pressure increase hone ka chance hai."
+        b_bg = "rgba(255,69,58,0.15)"
+        b_glow = "rgba(255,69,58,0.4)"
+        logic_desc = "DXY aur Real Yields dono breakout kar rahay hain. Institutional logic ke mutabiq, jab safe-haven bonds acha return dein (High Yield) aur Dollar strong ho, toh non-yielding asset (Gold) hold karne ki 'Opportunity Cost' barh jati hai. Is environment mein smart money Gold se paisa nikal kar bonds/dollar mein park karti hai.<br><br><span style='color:#FF453A; font-weight:700;'>Result: Heavy Selling Pressure expected on XAUUSD.</span>"
     elif ry_dir == "Falling" and dxy_dir == "Falling":
         b_text = "BULLISH 🟢"
         b_col = "#30D158"
-        logic_desc = "DXY aur Real Yield dono neechay gir rahay hain. Ye Gold ke liye perfect <strong>Bullish</strong> setup hai. Dollar weak hone aur real returns kam hone ki wajah se smart money Gold (Safe Haven) mein shift ho rahi hai."
+        b_bg = "rgba(48,209,88,0.15)"
+        b_glow = "rgba(48,209,88,0.4)"
+        logic_desc = "DXY aur Real Yields dono crash ho rahay hain. Institutional logic ke mutabiq, jab bonds ka return gir raha ho aur Dollar weak ho jaye, toh inflation aur market risk se bachne ke liye smart money direct Gold (Safe Haven) mein pump hoti hai.<br><br><span style='color:#30D158; font-weight:700;'>Result: Strong Buying Pressure expected on XAUUSD.</span>"
     else:
         b_text = "MIXED / NEUTRAL 🟡"
         b_col = "#FF9F0A"
-        logic_desc = f"DXY ({dxy_dir}) aur Real Yield ({ry_dir}) different directions mein move kar rahay hain. Macro correlation clear nahi hai. Aise environment mein technical levels par focus karna zyada behtar hai."
+        b_bg = "rgba(255,159,10,0.15)"
+        b_glow = "rgba(255,159,10,0.4)"
+        logic_desc = f"DXY ({dxy_dir}) aur Real Yield ({ry_dir}) ka correlation is waqt mixed hai (divergence). Market direction decide nahi kar paa rahi. Aise macro environment mein Gold normally range-bound rehta hai ya pure technical levels ko respect karta hai.<br><br><span style='color:#FF9F0A; font-weight:700;'>Result: Wait for clear Macro trend or trade strictly level-to-level.</span>"
 
+    # Ultra-Modern Expert Logic Decoder Card
     st.markdown(f'''
-    <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:18px;padding:25px;margin-top:10px;">
-        <div style="display:flex;align-items:center;margin-bottom:15px;gap:10px;">
-            <span style="font-size:24px;">🧠</span>
-            <span style="color:#d4af37;font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Expert Logic Decoder</span>
+    <div style="background: linear-gradient(145deg, rgba(20,20,20,0.9), rgba(10,10,10,0.95));
+                border: 1px solid rgba(212,175,55,0.25);
+                border-radius: 24px; padding: 25px 30px; margin-top: 20px;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+                position: relative; overflow: hidden;">
+        
+        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; 
+                    background: radial-gradient(circle, {b_glow} 0%, transparent 70%); filter: blur(30px); opacity: 0.5;"></div>
+
+        <div style="display:flex; align-items:center; justify-content:space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div style="background: rgba(212,175,55,0.1); width:40px; height:40px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size:20px; border:1px solid rgba(212,175,55,0.2);">🧠</div>
+                <div>
+                    <h3 style="margin:0; color:#d4af37; font-size:16px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">Macro Logic Decoder</h3>
+                    <p style="margin:0; color:rgba(255,255,255,0.4); font-size:11px; letter-spacing:0.5px;">Institutional Correlation Analysis</p>
+                </div>
+            </div>
+            <div>
+                <span style="background:{b_bg}; color:{b_col}; padding:8px 18px; border-radius:20px; font-weight:800; font-size:12px; box-shadow: 0 0 15px {b_glow}; border: 1px solid {b_col}; letter-spacing:1px;">{b_text}</span>
+            </div>
         </div>
-        <p style="color:rgba(255,255,255,0.6);font-size:13px;line-height:1.7;margin-bottom:20px;">{logic_desc}</p>
-        <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1px;font-weight:600;">Gold Macro Bias:</span>
-            <span style="font-size:12px;font-weight:800;color:{b_col};background:rgba(255,255,255,0.05);padding:6px 16px;border-radius:12px;">{b_text}</span>
+
+        <div style="background: rgba(0,0,0,0.3); border-radius: 16px; padding: 20px; border-left: 4px solid {b_col};">
+            <h4 style="margin:0 0 8px 0; color:#fff; font-size:13px; text-transform:uppercase; letter-spacing:1px;">Current Market Context</h4>
+            <p style="margin:0; color:rgba(255,255,255,0.75); font-size:14px; line-height:1.7;">{logic_desc}</p>
         </div>
     </div>
     ''', unsafe_allow_html=True)
