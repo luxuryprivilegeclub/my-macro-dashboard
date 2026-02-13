@@ -28,19 +28,22 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
     
-    /* Center the main app container with left/right space */
-    div.block-container {
-        max-width: 1200px !important;
-        margin: 0 auto !important;
-        padding-top: 2rem !important;
-    }
-
+    /* Layout and Anti-Overscroll Fixes */
     html, body, .stApp {
         background-color: #000000 !important;
         font-family: 'Inter', sans-serif;
     }
+    
+    /* Restore Standard Wide Width & Remove Bottom Space */
+    div.block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 0rem !important; /* Kills the extra space below footer */
+        margin-bottom: 0rem !important;
+    }
 
-    #MainMenu, footer, header {visibility: hidden;}
+    #MainMenu, header {visibility: hidden;}
+    footer {visibility: hidden; display: none !important;}
+    
     div[data-testid="stToolbar"], div[data-testid="stDecoration"],
     div[data-testid="stStatusWidget"], .stDeployButton {display: none;}
     
@@ -163,7 +166,6 @@ if 'news_articles' not in st.session_state:
 # 6. HEADER (STICKY NAVBAR FIXED)
 # ============================================
 def render_header():
-    # Adjusted margin-top to avoid cut-off and fixed padding
     st.markdown("""
     <style>
     div[data-testid="stVerticalBlock"]:has(#sticky-navbar) {
@@ -175,7 +177,7 @@ def render_header():
         padding: 15px 30px !important;
         border-radius: 0 0 24px 24px !important;
         border-bottom: 1px solid rgba(212, 175, 55, 0.2) !important;
-        margin-top: -1.5rem !important; 
+        margin-top: -2rem !important; 
         margin-bottom: 30px !important;
         box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
     }
@@ -193,7 +195,6 @@ def render_header():
         else:
             cols = st.columns([5, 1, 1])
 
-        # Logo and Welcome Msg - Font sizes increased
         with cols[0]:
             st.markdown(f'''
             <div style="display:flex;align-items:center;gap:15px;">
@@ -203,7 +204,6 @@ def render_header():
             </div>
             ''', unsafe_allow_html=True)
 
-        # Nav Buttons
         with cols[1]:
             if st.button("Home", use_container_width=True, key="nav_home"):
                 st.session_state['current_page'] = 'home'
@@ -261,11 +261,11 @@ def render_ticker_tape():
 
 
 # ============================================
-# 8. FOOTER (SPACING FIXED)
+# 8. FOOTER (NO EXTRA SPACE AT BOTTOM)
 # ============================================
 def render_footer():
     footer_html = (
-        '<div style="margin-top:40px;padding:30px 20px 20px;'
+        '<div style="margin-top:40px;padding:30px 20px 0px;'
         'border-top:1px solid rgba(255,255,255,0.1);text-align:center;">'
         '<div style="margin-bottom:15px;">'
         '<img src="' + LOGO_URL + '" width="50" height="50" '
@@ -292,7 +292,7 @@ def render_footer():
         '<span style="font-size:12px;color:rgba(255,255,255,0.2);">|</span>'
         '<span style="font-size:12px;color:rgba(255,255,255,0.4);">Contact</span>'
         '</div>'
-        '<p style="font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:2px;">2026 ROLLIC TRADES</p>'
+        '<p style="font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:2px; margin-bottom: 0px;">2026 ROLLIC TRADES</p>'
         '</div>'
     )
     st.markdown(footer_html, unsafe_allow_html=True)
