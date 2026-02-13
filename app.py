@@ -28,63 +28,69 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
     
-    /* Center the main app container with left/right space */
+    /* Global App Background & Anti-Overscroll Fix */
+    html, body, .stApp {
+        background-color: #000000 !important;
+        font-family: 'Inter', sans-serif;
+    }
+    
     div.block-container {
         max-width: 1200px !important;
         margin: 0 auto !important;
         padding-top: 1rem !important;
     }
 
-    .stApp {background:#000;font-family:'Inter',sans-serif;}
-    #MainMenu,footer,header{visibility:hidden;}
-    div[data-testid="stToolbar"],div[data-testid="stDecoration"],
-    div[data-testid="stStatusWidget"],.stDeployButton{display:none;}
-    ::-webkit-scrollbar{width:5px;}
-    ::-webkit-scrollbar-track{background:#000;}
-    ::-webkit-scrollbar-thumb{background:#222;border-radius:10px;}
+    #MainMenu, footer, header {visibility: hidden;}
+    div[data-testid="stToolbar"], div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"], .stDeployButton {display: none;}
+    
+    ::-webkit-scrollbar {width: 5px;}
+    ::-webkit-scrollbar-track {background: #000;}
+    ::-webkit-scrollbar-thumb {background: #222; border-radius: 10px;}
 
     div.stButton > button {
-        background:rgba(255,255,255,0.03)!important;
-        color:rgba(255,255,255,0.7)!important;
-        border:1px solid rgba(255,255,255,0.08)!important;
-        border-radius:12px!important;padding:10px 20px!important;
-        font-family:'Inter',sans-serif!important;
-        font-weight:600!important;font-size:13px!important;
-        transition:all 0.3s ease!important;
+        background: rgba(255,255,255,0.03) !important;
+        color: rgba(255,255,255,0.7) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 12px !important; padding: 10px 20px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important; font-size: 13px !important;
+        transition: all 0.3s ease !important;
     }
     div.stButton > button:hover {
-        background:rgba(212,175,55,0.1)!important;
-        color:#d4af37!important;border-color:rgba(212,175,55,0.25)!important;
+        background: rgba(212,175,55,0.1) !important;
+        color: #d4af37 !important; border-color: rgba(212,175,55,0.25) !important;
     }
+    
     div[data-testid="stTextInput"] input {
-        background:rgba(255,255,255,0.03)!important;
-        border:1px solid rgba(255,255,255,0.08)!important;
-        border-radius:12px!important;color:#fff!important;
-        font-size:14px!important;padding:14px 16px!important;
+        background: rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 12px !important; color: #fff !important;
+        font-size: 14px !important; padding: 14px 16px !important;
     }
     div[data-testid="stTextInput"] input:focus {
-        border-color:#d4af37!important;box-shadow:0 0 0 3px rgba(212,175,55,0.08)!important;
+        border-color: #d4af37 !important; box-shadow: 0 0 0 3px rgba(212,175,55,0.08) !important;
     }
-    div[data-testid="stTextInput"] label{color:rgba(255,255,255,0.4)!important;font-weight:500!important;font-size:12px!important;}
-    div[data-testid="stTextArea"] textarea{background:rgba(255,255,255,0.03)!important;border:1px solid rgba(255,255,255,0.08)!important;border-radius:12px!important;color:#fff!important;}
-    div[data-testid="stTextArea"] label{color:rgba(255,255,255,0.4)!important;}
-    div[data-testid="stSelectbox"] > div > div{background:rgba(255,255,255,0.03)!important;border:1px solid rgba(255,255,255,0.08)!important;border-radius:12px!important;}
-    div[data-testid="stSelectbox"] label{color:rgba(255,255,255,0.4)!important;}
-    div[data-testid="stTabs"] button{color:rgba(255,255,255,0.4)!important;font-weight:600!important;font-size:13px!important;background:transparent!important;}
-    div[data-testid="stTabs"] button[aria-selected="true"]{color:#d4af37!important;border-bottom-color:#d4af37!important;}
-    div[data-testid="stFileUploader"]{background:rgba(255,255,255,0.015)!important;border:2px dashed rgba(212,175,55,0.15)!important;border-radius:16px!important;}
-    div[data-testid="stDateInput"] input{background:rgba(255,255,255,0.03)!important;border:1px solid rgba(255,255,255,0.08)!important;border-radius:12px!important;color:white!important;}
-    div[data-testid="stMetric"]{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:18px;}
-    div[data-testid="stMetric"] label{color:rgba(255,255,255,0.3)!important;font-size:11px!important;letter-spacing:1px!important;text-transform:uppercase!important;}
-    div[data-testid="stMetric"] div[data-testid="stMetricValue"]{color:#d4af37!important;font-weight:700!important;}
-    hr{border:none!important;height:1px!important;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.05),transparent)!important;margin:35px 0!important;}
-    h1 a,h2 a,h3 a{display:none!important;}
+    div[data-testid="stTextInput"] label {color: rgba(255,255,255,0.4) !important; font-weight: 500 !important; font-size: 12px !important;}
+    div[data-testid="stTextArea"] textarea {background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 12px !important; color: #fff !important;}
+    div[data-testid="stTextArea"] label {color: rgba(255,255,255,0.4) !important;}
+    div[data-testid="stSelectbox"] > div > div {background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 12px !important;}
+    div[data-testid="stSelectbox"] label {color: rgba(255,255,255,0.4) !important;}
+    div[data-testid="stTabs"] button {color: rgba(255,255,255,0.4) !important; font-weight: 600 !important; font-size: 13px !important; background: transparent !important;}
+    div[data-testid="stTabs"] button[aria-selected="true"] {color: #d4af37 !important; border-bottom-color: #d4af37 !important;}
+    div[data-testid="stFileUploader"] {background: rgba(255,255,255,0.015) !important; border: 2px dashed rgba(212,175,55,0.15) !important; border-radius: 16px !important;}
+    div[data-testid="stDateInput"] input {background: rgba(255,255,255,0.03) !important; border: 1px solid rgba(255,255,255,0.08) !important; border-radius: 12px !important; color: white !important;}
+    div[data-testid="stMetric"] {background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 18px;}
+    div[data-testid="stMetric"] label {color: rgba(255,255,255,0.3) !important; font-size: 11px !important; letter-spacing: 1px !important; text-transform: uppercase !important;}
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {color: #d4af37 !important; font-weight: 700 !important;}
+    hr {border: none !important; height: 1px !important; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent) !important; margin: 35px 0 !important;}
+    h1 a, h2 a, h3 a {display: none !important;}
 
-    @keyframes shimmer{0%,100%{background-position:0% center;}50%{background-position:200% center;}}
-    @keyframes pulse-glow{0%,100%{box-shadow:0 0 0 0 rgba(48,209,88,0.4);}50%{box-shadow:0 0 0 8px rgba(48,209,88,0);}}
-    @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-    @keyframes fadeInUp{0%{opacity:0;transform:translateY(20px);}100%{opacity:1;transform:translateY(0);}}
-    @keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(212,175,55,0.1);}50%{box-shadow:0 0 40px rgba(212,175,55,0.2);}}
+    @keyframes shimmer {0%,100% {background-position:0% center;} 50% {background-position:200% center;}}
+    @keyframes pulse-glow {0%,100% {box-shadow:0 0 0 0 rgba(48,209,88,0.4);} 50% {box-shadow:0 0 0 8px rgba(48,209,88,0);}}
+    @keyframes float {0%,100% {transform:translateY(0);} 50% {transform:translateY(-8px);}}
+    @keyframes fadeInUp {0% {opacity:0;transform:translateY(20px);} 100% {opacity:1;transform:translateY(0);}}
+    @keyframes glow-pulse {0%,100% {box-shadow:0 0 20px rgba(212,175,55,0.1);} 50% {box-shadow:0 0 40px rgba(212,175,55,0.2);}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -153,56 +159,71 @@ if 'news_articles' not in st.session_state:
 
 
 # ============================================
-# 6. HEADER
+# 6. HEADER (STICKY NAVBAR FIX)
 # ============================================
 def render_header():
-    uname = st.session_state['username'] if st.session_state['username'] else "User"
-    u_init = uname[0].upper()
+    # CSS to make the Navbar Sticky and remove blank space
+    st.markdown("""
+    <style>
+    div[data-testid="stVerticalBlock"]:has(#sticky-navbar) {
+        position: sticky !important;
+        top: 0px !important;
+        z-index: 99999 !important;
+        background: rgba(5, 5, 5, 0.90) !important;
+        backdrop-filter: blur(20px) !important;
+        padding: 10px 25px 0px 25px !important;
+        border-radius: 0 0 24px 24px !important;
+        border-bottom: 1px solid rgba(212, 175, 55, 0.15) !important;
+        margin-top: -3rem !important; /* Removes top blank space */
+        margin-bottom: 25px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.7) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    header_html = (
-        '<div style="background:rgba(10,10,10,0.95);backdrop-filter:blur(20px);'
-        'border:1px solid rgba(255,255,255,0.06);border-radius:16px;'
-        'padding:14px 24px;margin-bottom:6px;display:flex;align-items:center;'
-        'justify-content:space-between;">'
-        '<div style="display:flex;align-items:center;gap:10px;">'
-        '<img src="' + LOGO_URL + '" width="34" height="34" '
-        'style="border-radius:50%;object-fit:cover;border:2px solid rgba(212,175,55,0.4);">'
-        '<span style="font-size:14px;font-weight:700;letter-spacing:2px;color:#d4af37;">ROLLIC TRADES</span>'
-        '</div>'
-        '<div style="display:flex;align-items:center;gap:8px;">'
-        '<span style="font-size:11px;color:rgba(255,255,255,0.35);font-weight:500;">' + uname + '</span>'
-        '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#8b6914);'
-        'display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#000;">'
-        + u_init + '</div></div></div>'
-    )
-    st.markdown(header_html, unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<span id="sticky-navbar"></span>', unsafe_allow_html=True)
+        uname = st.session_state['username'] if st.session_state['username'] else "User"
+        
+        is_admin = (st.session_state['user_role'] == 'Admin')
+        
+        if is_admin:
+            cols = st.columns([4, 1, 1, 1])
+        else:
+            cols = st.columns([5, 1, 1])
 
-    is_admin = (st.session_state['user_role'] == 'Admin')
-    if is_admin:
-        cols = st.columns([1, 1, 1])
-    else:
-        cols = st.columns([1, 1])
+        # Logo and Welcome Msg
+        with cols[0]:
+            st.markdown(f'''
+            <div style="display:flex;align-items:center;gap:12px; padding-top:4px;">
+                <img src="{LOGO_URL}" width="38" height="38" style="border-radius:50%;border:2px solid #d4af37;">
+                <span style="font-size:18px;font-weight:800;letter-spacing:2px;color:#d4af37;">ROLLIC</span>
+                <span style="font-size:12px;color:rgba(255,255,255,0.4); border-left:1px solid rgba(255,255,255,0.2); padding-left:12px; text-transform:uppercase;">{uname}</span>
+            </div>
+            ''', unsafe_allow_html=True)
 
-    with cols[0]:
-        if st.button("Home", use_container_width=True, key="nav_home"):
-            st.session_state['current_page'] = 'home'
-            st.rerun()
-    if is_admin:
+        # Nav Buttons
         with cols[1]:
-            if st.button("Admin", use_container_width=True, key="nav_admin"):
-                st.session_state['current_page'] = 'admin'
-                st.rerun()
-        with cols[2]:
-            if st.button("Sign Out", use_container_width=True, key="nav_out"):
-                st.session_state['logged_in'] = False
+            if st.button("Home", use_container_width=True, key="nav_home"):
                 st.session_state['current_page'] = 'home'
                 st.rerun()
-    else:
-        with cols[1]:
-            if st.button("Sign Out", use_container_width=True, key="nav_out"):
-                st.session_state['logged_in'] = False
-                st.session_state['current_page'] = 'home'
-                st.rerun()
+
+        if is_admin:
+            with cols[2]:
+                if st.button("Admin", use_container_width=True, key="nav_admin"):
+                    st.session_state['current_page'] = 'admin'
+                    st.rerun()
+            with cols[3]:
+                if st.button("Sign Out", use_container_width=True, key="nav_out"):
+                    st.session_state['logged_in'] = False
+                    st.session_state['current_page'] = 'home'
+                    st.rerun()
+        else:
+            with cols[2]:
+                if st.button("Sign Out", use_container_width=True, key="nav_out"):
+                    st.session_state['logged_in'] = False
+                    st.session_state['current_page'] = 'home'
+                    st.rerun()
 
 
 # ============================================
